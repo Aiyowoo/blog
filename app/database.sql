@@ -12,6 +12,7 @@ create table Users(
 id int primary key,
 role int not null,
 email varchar(255) not null unique,
+hashedPassword char(64) not null,
 -- 昵称
 name varchar(255) not null,
 -- 创建日期

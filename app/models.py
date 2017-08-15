@@ -2,6 +2,8 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
 
 Base = declarative_base()
@@ -109,15 +111,37 @@ class Tag(Base):
     User = relationship('User')
 
 
-class User(Base):
+class User(UserMixin, Base):
     __tablename__ = 'Users'
 
     id = Column(Integer, primary_key=True)
     role = Column(ForeignKey('Roles.id'), nullable=False, index=True)
     email = Column(String(255), nullable=False, unique=True)
+    hashedPassword = Column(String(64), nullable=False)
     name = Column(String(255), nullable=False)
     creationDate = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"))
     introduction = Column(String(255), nullable=False)
     profilePicture = Column(String(255))
 
     Role = relationship('Role')
+
+    @property
+    def password(self):
+        raise AttributeError('Unable to read password!')
+
+    @password.setter
+    def password(self, newPassword):
+        """
+
+        传入未加密的密码，赋值为加密后的密码
+
+        """
+        self.hashedPassword = generate_password_hash(newPassword)
+
+    def checkPassword(self, password):
+        """
+
+        检查密码是否正确
+
+        """
+        return check_password_hash(self.hashedPassword, password)
