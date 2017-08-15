@@ -3,15 +3,15 @@ create database blog;
 use blog;
 
 create table Roles(
-id int primary key,
+id int primary key auto_increment,
 name varchar(255) not null,
 permissions int not null
 );
 
 create table Users(
-id int primary key,
+id int primary key auto_increment,
 role int not null,
-email varchar(255) not null unique,
+email char(128) not null unique,
 hashedPassword char(64) not null,
 -- 昵称
 name varchar(255) not null,
@@ -29,7 +29,7 @@ foreign key(role) references Roles(id)
 -- 文章的分类标签
 -- tag创建后就不能删除
 create table Tags(
-id int primary key,
+id int primary key auto_increment,
 name char not null,
 createUserId int not null,
 creationDate timestamp not null default CURRENT_TIMESTAMP,
@@ -39,14 +39,14 @@ foreign key(createUserId) references Users(id)
 
 -- 表示上传上来的原始文章的格式类型
 create table OriginalArticleFormatType(
-id int primary key,
+id int primary key auto_increment,
 -- 格式名
 name char not null
 );
 
 -- 文章
 create table Articles(
-id int primary key,
+id int primary key auto_increment,
 -- 文章属主
 userId int not null,
 -- 因为需要经常查询用户名和用户头像所以做下冗余
@@ -100,7 +100,7 @@ foreign key(tagId) references Tags(id)
 -- 评论
 -- 暂时只支持纯文本
 create table Reviews(
-id int primary key,
+id int primary key auto_increment,
 userId int not null,
 -- 用户信息适当冗余
 userName varchar(255) not null,
@@ -120,7 +120,7 @@ foreign key(articleId) references Articles(id)
 -- 针对评论的回复，暂时仅支持纯文本
 -- 采用百度贴吧那种盖楼形式
 create table Replies(
-id int primary key,
+id int primary key auto_increment,
 reviewId int not null,
 
 fromUserId int not null,
