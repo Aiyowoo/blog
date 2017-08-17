@@ -1,57 +1,70 @@
 # coding: utf-8
-from sqlalchemy import (Column, DateTime, ForeignKey,
-                        Integer, String, Text, text)
-from sqlalchemy.orm import relationship
+from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
-from . import db
+from flask_login import UserMixin, AnonymousUserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import BadSignature, SignatureExpired
+from . import db, loginManager
+from appInstance import app
+
+
+class Permission:
+    FOLLOW = 0x01
+    COMMENT = 0x02
+    WRITE_ARTICLES = 0x04
+    MANAGE_COMMENTS = 0x08
+    ADMIN = 0x80
 
 
 # 对于sqlacodegen生成的代码如果想使用flask-sqlalchemy应改为继承自db.Model
 class ArticleTag(db.Model):
     __tablename__ = 'ArticleTags'
 
-    articleId = Column(ForeignKey('Articles.id'),
+    articleId = db.Column(db.ForeignKey('Articles.id'),
                        primary_key=True, nullable=False)
-    tagId = Column(ForeignKey('Tags.id'), primary_key=True,
+    tagId = db.Column(db.ForeignKey('Tags.id'), primary_key=True,
                    nullable=False, index=True)
-    deleted = Column(Integer, nullable=False, server_default=text("'0'"))
+    creationDate = db.Column(db.DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
 
-    Article = relationship('Article')
-    Tag = relationship('Tag')
+    article = db.relationship('Article', uselist=False,
+                              backref=db.backref('tagRecords', lazy='dynamic'))
+    tag = db.relationship('Tag', uselist=False,
+                          backref=db.backref('articleRecords', lazy='dynamic'))
 
     def __repr__(self):
         return '<ArticleTag articleId={}, tagId={}, deleted={}>'.\
-            format(self.articleId, self.tagId, self.deleted)
+            format(self.articleId, self.tagId, self.creationDate)
 
 
 class Article(db.Model):
     __tablename__ = 'Articles'
 
-    id = Column(Integer, primary_key=True)
-    userId = Column(ForeignKey('Users.id'), nullable=False, index=True)
-    userName = Column(String(255), nullable=False)
-    userProfilePicture = Column(String(255), nullable=False)
-    title = Column(String(255), nullable=False)
-    originalType = Column(ForeignKey('OriginalArticleFormatType.id'),
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
+    userName = db.Column(db.String(255), nullable=False)
+    userProfilePicture = db.Column(db.String(255), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    originalType = db.Column(db.ForeignKey('OriginalArticleFormatType.id'),
                           nullable=False, index=True)
-    originalSummary = Column(String(1), nullable=False)
-    originalContent = Column(Text, nullable=False)
-    firstContentPicture = Column(String(255))
-    summary = Column(String(1), nullable=False)
-    content = Column(Text, nullable=False)
-    creationDate = Column(DateTime, nullable=False,
+    originalSummary = db.Column(db.String(1), nullable=False)
+    originalContent = db.Column(db.Text, nullable=False)
+    firstContentPicture = db.Column(db.String(255))
+    summary = db.Column(db.String(1), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    creationDate = db.Column(db.DateTime, nullable=False,
                           server_default=text("CURRENT_TIMESTAMP"))
-    lastModifiedDate = Column(DateTime, nullable=False,
+    lastModifiedDate = db.Column(db.DateTime, nullable=False,
                               server_default=text("CURRENT_TIMESTAMP"))
-    likeCount = Column(Integer, server_default=text("'0'"))
-    dislikeCount = Column(Integer, server_default=text("'0'"))
-    viewedCount = Column(Integer, server_default=text("'0'"))
-    reviewCount = Column(Integer, server_default=text("'0'"))
-    deleted = Column(Integer, nullable=False, server_default=text("'0'"))
+    likeCount = db.Column(db.Integer, server_default=text("'0'"))
+    dislikeCount = db.Column(db.Integer, server_default=text("'0'"))
+    viewedCount = db.Column(db.Integer, server_default=text("'0'"))
+    reviewCount = db.Column(db.Integer, server_default=text("'0'"))
+    deleted = db.Column(db.Integer, nullable=False, server_default=text("'0'"))
 
-    OriginalArticleFormatType = relationship('OriginalArticleFormatType')
-    User = relationship('User')
+    formatType = db.relationship('OriginalArticleFormatType', uselist=False,
+                              backref=db.backref('articles', lazy='dynamic'))
+    user = db.relationship('User', uselist=False,
+                        backref=db.backref('articles', lazy='dynamic'))
 
     def __repr__(self):
         return '<Article id={}, userId={}, userName={}, title={}>'.\
@@ -61,8 +74,8 @@ class Article(db.Model):
 class OriginalArticleFormatType(db.Model):
     __tablename__ = 'OriginalArticleFormatType'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(1), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1), nullable=False)
 
     def __repr__(self):
         return '<OriginalArticleFormatType id={}, name={}>'.\
@@ -72,24 +85,25 @@ class OriginalArticleFormatType(db.Model):
 class Reply(db.Model):
     __tablename__ = 'Replies'
 
-    id = Column(Integer, primary_key=True)
-    reviewId = Column(ForeignKey('Articles.id'), nullable=False, index=True)
-    fromUserId = Column(ForeignKey('Users.id'), nullable=False, index=True)
-    fromUserName = Column(String(255), nullable=False)
-    fromUserProfilePicture = Column(String(255), nullable=False)
-    toUserId = Column(ForeignKey('Users.id'), nullable=False, index=True)
-    toUserName = Column(String(255), nullable=False)
-    toUserProfilePicture = Column(String(255), nullable=False)
-    creationDate = Column(DateTime, nullable=False,
+    id = db.Column(db.Integer, primary_key=True)
+    reviewId = db.Column(db.ForeignKey('Reviews.id'), nullable=False, index=True)
+    fromUserId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
+    fromUserName = db.Column(db.String(255), nullable=False)
+    fromUserProfilePicture = db.Column(db.String(255), nullable=False)
+    toUserId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
+    toUserName = db.Column(db.String(255), nullable=False)
+    toUserProfilePicture = db.Column(db.String(255), nullable=False)
+    creationDate = db.Column(db.DateTime, nullable=False,
                           server_default=text("CURRENT_TIMESTAMP"))
-    content = Column(Text, nullable=False)
-    pid = Column(ForeignKey('Replies.id'), index=True)
-    deleted = Column(Integer, nullable=False, server_default=text("'0'"))
+    content = db.Column(db.Text, nullable=False)
+    pid = db.Column(db.ForeignKey('Replies.id'), index=True)
+    deleted = db.Column(db.Integer, nullable=False, server_default=text("'0'"))
 
-    User = relationship('User', primaryjoin='Reply.fromUserId == User.id')
-    parent = relationship('Reply', remote_side=[id])
-    Article = relationship('Article')
-    User1 = relationship('User', primaryjoin='Reply.toUserId == User.id')
+    fromUser = db.relationship('User', primaryjoin='Reply.fromUserId == User.id')
+    parent = db.relationship('Reply', remote_side=[id])
+    review = db.relationship('Review', uselist=False,
+                             backref=db.backref('replies', lazy='dynamic'))
+    toUser = db.relationship('User', primaryjoin='Reply.toUserId == User.id')
 
     def __repr__(self):
         return '<Reply id={}, fromUserId={}, fromUserName={}, \
@@ -101,18 +115,20 @@ class Reply(db.Model):
 class Review(db.Model):
     __tablename__ = 'Reviews'
 
-    id = Column(Integer, primary_key=True)
-    userId = Column(ForeignKey('Users.id'), nullable=False, index=True)
-    userName = Column(String(255), nullable=False)
-    userProfilePicture = Column(String(255), nullable=False)
-    articleId = Column(ForeignKey('Articles.id'), nullable=False, index=True)
-    creationDate = Column(DateTime, nullable=False,
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
+    userName = db.Column(db.String(255), nullable=False)
+    userProfilePicture = db.Column(db.String(255), nullable=False)
+    articleId = db.Column(db.ForeignKey('Articles.id'), nullable=False, index=True)
+    creationDate = db.Column(db.DateTime, nullable=False,
                           server_default=text("CURRENT_TIMESTAMP"))
-    content = Column(Text, nullable=False)
-    deleted = Column(Integer, nullable=False, server_default=text("'0'"))
+    content = db.Column(db.Text, nullable=False)
+    deleted = db.Column(db.Integer, nullable=False, server_default=text("'0'"))
 
-    Article = relationship('Article')
-    User = relationship('User')
+    article = db.relationship('Article', uselist=False,
+                           backref=db.backref('reviews', lazy='dynamic'))
+    user = db.relationship('User', uselist=False,
+                           backref=db.backref('reviews', lazy='dynamic'))
 
     def __repr__(self):
         summary = self.content[:20] + '' if len(self.content) > 20 else "..."
@@ -123,47 +139,100 @@ class Review(db.Model):
 class Role(db.Model):
     __tablename__ = 'Roles'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(255), nullable=False)
-    permissions = Column(Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    permissions = db.Column(db.Integer, nullable=False)
+
+    USER_ID = 1
+    ADMIN_ID = 2
+
+    @staticmethod
+    def insertRoles():
+        roles = {
+            'user': (Permission.FOLLOW | Permission.COMMENT | Permission.WRITE_ARTICLES),
+            'admin': (Permission.ADMIN)
+        }
+        for name, permissions in roles.items():
+            role = Role.query.filter_by(name=name).first()
+            if role is None:
+                role = Role(name=name)
+            role.permissions = permissions
+            db.session.add(role)
+        db.session.commit()
 
     def __repr__(self):
         return '<Role id={}, name={}, permissions={}>'.\
             format(self.id, self.name,
-                   '0x' + hex(self.permissions)[2:].zfill(8))
+                   '0x' + hex(self.permissions or 0)[2:].zfill(8))
 
 
 class Tag(db.Model):
     __tablename__ = 'Tags'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(1), nullable=False)
-    createUserId = Column(ForeignKey('Users.id'), nullable=False, index=True)
-    creationDate = Column(DateTime, nullable=False,
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(1), nullable=False)
+    createUserId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
+    creationDate = db.Column(db.DateTime, nullable=False,
                           server_default=text("CURRENT_TIMESTAMP"))
 
-    User = relationship('User')
+    createUser = db.relationship('User')
 
     def __repr__(self):
         return '<Tag id={}, name={}, creationDate={}>'.\
             format(self.id, self.name, self.creationDate)
 
 
+class Following(db.Model):
+    __tablename__ = 'Following'
+
+    userId = db.Column(db.ForeignKey('Users.id'), primary_key=True, nullable=False)
+    followerId = db.Column(db.ForeignKey('Users.id'), primary_key=True, nullable=False, index=True)
+    creationDate = db.Column(db.DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
+
+    followedUser = db.relationship('User', primaryjoin='Following.userId == User.id',
+                                   backref=db.backref('followedRecords'), uselist=False)
+    follower = db.relationship('User', primaryjoin='Following.followerId == User.id',
+                               backref=db.backref('followerRecords'), uselist=False)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'Users'
 
-    id = Column(Integer, primary_key=True)
-    role = Column(ForeignKey('Roles.id'), nullable=False, index=True)
-    email = Column(String(255), nullable=False, unique=True)
-    hashedPassword = Column(String(64), nullable=False)
-    name = Column(String(255), nullable=False)
-    creationDate = Column(DateTime, nullable=False,
+    id = db.Column(db.Integer, primary_key=True)
+    roleId = db.Column(db.ForeignKey('Roles.id'), nullable=False, index=True)
+    email = db.Column(db.String(255), nullable=False, unique=True)
+    hashedPassword = db.Column(db.String(64), nullable=False)
+    confirmed = db.Column(db.Integer, nullable=False, server_default=text("'0'"))
+    name = db.Column(db.String(255), nullable=False)
+    creationDate = db.Column(db.DateTime, nullable=False,
                           server_default=text("CURRENT_TIMESTAMP ON \
                           UPDATE CURRENT_TIMESTAMP"))
-    introduction = Column(String(255), nullable=False)
-    profilePicture = Column(String(255))
+    introduction = db.Column(db.String(255), nullable=False)
+    profilePicture = db.Column(db.String(255))
 
-    Role = relationship('Role')
+    role = db.relationship('Role', uselist=False, backref=db.backref('users', lazy='dynamic'))
+
+    @staticmethod
+    def createAUser(*args, **kwargs):
+        """
+
+        创建一个角色为User的用户，并不存入数据库
+
+        """
+        user = User(*args, **kwargs)
+        user.roleId = Role.USER_ID
+        return user
+
+    @staticmethod
+    def createAnAdmin(*args, **kwargs):
+        """
+
+        创建并返回一个admin类型的用户，并不存入数据库
+
+        """
+        admin = User(*args, **kwargs)
+        admin.roleId = Role.ADMIN_ID
+        return admin
 
     def __repr__(self):
         return '<User email={}, name={}>'.format(self.email, self.name)
@@ -188,3 +257,49 @@ class User(UserMixin, db.Model):
 
         """
         return check_password_hash(self.hashedPassword, password)
+
+    def generateConfirmToken(self):
+        serializer = Serializer(app.config['CONFIRM_TOKEN_SECRET_KEY'],
+                                expires_in=3600)
+        return serializer.dumps({'confirmedUserId', self.id})
+
+    def confirm(self, token):
+        '''
+
+        token正确，完成用户邮箱验证，返回True
+        否则返回False
+
+        '''
+        assert not self.confirmed, '{} has confirmed!'.format(str(self))
+        serializer = Serializer(app.config['CONFIRM_TOKEN_SECRET_KEY'],
+                                expires_in=3600)
+        try:
+            data = serializer.loads(token)
+        except SignatureExpired:
+            return False
+        except BadSignature:
+            return False
+        if data.get('confirmUserId') != self.id:
+            return False
+        self.confirmed = True
+        db.session.add(self)
+        return True
+
+    def can(self, permission):
+        return self.role.permissions & permission
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def can(self, permission):
+        return False
+
+
+# Role.USER_ID = Role.query.filter_by(name='user').first().id
+# Role.ADMIN_ID = Role.query.filter_by(name='amdin').first().id
+
+loginManager.anonymous_user = AnonymousUser
+
+
+@loginManager.user_loader
+def loadUser(userId):
+    return User.get(userId)

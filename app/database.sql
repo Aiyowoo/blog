@@ -1,5 +1,5 @@
 drop database if exists blog;
-create database blog;
+create database blog default charset = utf8mb4;
 use blog;
 
 create table Roles(
@@ -10,20 +10,32 @@ permissions int not null
 
 create table Users(
 id int primary key auto_increment,
-role int not null,
+roleId int not null,
 email char(128) not null unique,
-hashedPassword char(64) not null,
+hashedPassword char(255) not null,
+-- 邮箱是否验证
+confirmed bool not null default false,
 -- 昵称
 name varchar(255) not null,
 -- 创建日期
-creationDate timestamp not null,
+creationDate timestamp not null default CURRENT_TIMESTAMP,
 -- 个人简介
-introduction varchar(255) not null,
+introduction varchar(511),
 -- 用户头像
 -- 可为null，null时表示默认头像
 profilePicture varchar(255),
 
-foreign key(role) references Roles(id)
+foreign key(roleId) references Roles(id)
+);
+
+create table Following(
+userId int not null,
+followerId int not null,
+creationDate timestamp not null default CURRENT_TIMESTAMP,
+
+primary key(userId, followerId),
+foreign key(userId) references Users(id),
+foreign key(followerId) references Users(id)
 );
 
 -- 文章的分类标签
@@ -90,7 +102,7 @@ articleId int not null,
 tagId int not null,
 -- 用来标识文章是否被删除，当文章被删除时，根据tag查看不应该看到相应的article
 -- tag删除时仅需将记录从该表中删除即可
-deleted bool not null default false,
+creationDate timestamp not null default CURRENT_TIMESTAMP,
 
 primary key(articleId, tagId),
 foreign key(articleId) references Articles(id),
@@ -137,7 +149,7 @@ pid int null,
 -- 标识此回复是否被删除
 deleted bool not null default false,
 
-foreign key(reviewId) references Articles(id),
+foreign key(reviewId) references Reviews(id),
 foreign key(fromUserId) references Users(id),
 foreign key(toUserId) references Users(id),
 foreign key(pid) references Replies(id)
@@ -208,3 +220,8 @@ begin
 end //
 
 delimiter ;
+
+
+insert Roles(name, permissions) values
+('user', 255),
+('admin', 255);
