@@ -1,10 +1,10 @@
 from flask_script import Manager, Shell, Command
-from app import db
+from app import db, createApp
 from app.models import (ArticleTag, Article, OriginalArticleFormatType,
                         Reply, Review, Role, Tag, User, Following)
-from appInstance import app
 
 
+app = createApp()
 manager = Manager(app)
 
 

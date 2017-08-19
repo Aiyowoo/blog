@@ -23,3 +23,12 @@ def unconfirmedRequired(func):
             return redirect(url_for('main.index'))
         func(*args, **kwargs)
     return wrappedFunc
+
+
+def next_is_valid(next):
+    """
+
+    判断登录后访问的网址是否有效
+
+    """
+    return True

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}blog-记录生活的点点滴滴{% endblock title %}
+
+{% block js %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/loginAndRegister.js') }}" defer="defer"></script>
+{% endblock js%}
+
+{% block body %}
+<body class="gray-background">
+    <div class="container">
+        <div class="col-sm-4 col-sm-offset-4">
+            <div class="row logo-top-margin">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" class="center-block"/>
+            </div>
+            <div class="row top-margin-lg">
+                <p class="text-center">记录生活的点点滴滴</p>
+            </div>
+
+            <div class="row top-margin-lg">
+                <ul class="nav nav-tabs nav-center">
+                    <li id="register-li"><a id="register-button"><strong>注册</strong></a></li>
+                    <li id="login-li"><a id="login-button"><strong>登录</strong></a></li>
+                </ul>
+            </div>
+
+            <div id="login" class="row top-margin-lg">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    {{ loginForm.hidden_tag() }}
+                    {{ loginForm.email(class='form-control input-lg square-corner', placeholder='邮箱') }}
+                    {{ loginForm.password(class='form-control input-lg square-corner', placeholder='密码') }}
+                    <div class="top-margin-sm">
+                        <a class="text-right pull-right">忘记密码?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary form-control top-margin-lg input-lg">登录</button>
+                </form>
+            </div>
+
+            <div id="register" class="row top-margin-lg">
+                <form method="POST" action="{{ url_for('auth.userRegister') }}">
+                    {{ registerForm.hidden_tag() }}
+                    {{ registerForm.email(class='form-control input-lg square-corner', placeholder='邮箱') }}
+                    {{ registerForm.name(class='form-control input-lg square-corner', placeholder='昵称') }}
+                    {{ registerForm.password(class='form-control input-lg square-corner', placeholder='密码') }}
+                    {{ registerForm.confirm(class='form-control input-lg square-corner', placeholder='密码确认') }}
+                    <button type="submit" class="btn btn-primary form-control input-lg top-margin-lg">注册</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</body>
+{% endblock body %}

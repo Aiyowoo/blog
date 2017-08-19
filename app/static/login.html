@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- 这三个meta标签必需放在最前面 -->
+    <meta charset="utf-8" />
+    <meta charset="X-UA-Compatible" content="IE=edge" />
+    <meta name="Viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/custom.css" rel="stylesheet" />
+
+    <script src="js/jquery-3.2.1.js" defer="defer"></script>
+    <script src="js/bootstrap.min.js" defer="defer"></script>
+
+    <script src="js/loginAndRegister.js" defer="defer"></script>
+
+    <title>登录注册页面</title>
+</head>
+
+<body class="gray-background">
+    <div class="container">
+        <div class="col-sm-4 col-sm-offset-4">
+            <div class="row logo-top-margin">
+                <img src="img/logo.png" class="center-block"/>
+            </div>
+            <div class="row top-margin-lg">
+                <p class="text-center">记录生活的点点滴滴</p>
+            </div>
+
+            <div class="row top-margin-lg">
+                <ul class="nav nav-tabs nav-center">
+                    <li id="register-li"><a id="register-button"><strong>注册</strong></a></li>
+                    <li id="login-li"><a id="login-button"><strong>登录</strong></a></li>
+                </ul>
+            </div>
+
+            <div id="login" class="row top-margin-lg">
+                <form>
+                    <input type="text" class="form-control input-lg square-corner" placeholder="邮箱" />
+                    <input type="password" class="form-control input-lg square-corner" placeholder="密码" />
+                    <div class="top-margin-sm">
+                        <a class="text-right pull-right">忘记密码?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary form-control top-margin-lg input-lg">登录</button>
+                </form>
+            </div>
+
+            <div id="register" class="row top-margin-lg">
+                <form>
+                    <input type="text" class="form-control input-lg square-corner" placeholder="邮箱"/>
+                    <input type="text" class="form-control input-lg square-corner" placeholder="昵称"/>
+                    <input type="text" class="form-control input-lg square-corner" placeholder="密码"/>
+                    <input type="text" class="form-control input-lg square-corner" placeholder="密码确认"/>
+                    <button type="submit" class="btn btn-primary form-control input-lg top-margin-lg">注册</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

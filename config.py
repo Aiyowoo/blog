@@ -8,6 +8,7 @@ class BaseConfig:
     # itsdangerous配置
     CONFIRM_TOKEN_SECRET_KEY = 'to generate a token hard to guess'
 
+    SECRET_KEY = 'hello world'
     # flask-wtf配置
     CSRF_SECRET_KEY = "hello world"
     WTF_CSRF_SECRET_KEY = "secret key that no one can guess"

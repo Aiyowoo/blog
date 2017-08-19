@@ -1,11 +1,13 @@
 from flask import (redirect, url_for, flash, render_template,
-                   request, next_is_valid, abort)
+                   request, abort, Blueprint)
 from flask_login import login_user, login_required, current_user, logout_user
-from . import auth
 from .forms import RegisterForm, LoginForm
-from .utility import (sendConfirmRegisteEmail, unconfirmedRequired)
-from ..models import User
-from .. import db
+from .utility import (sendConfirmRegisteEmail, unconfirmedRequired,
+                      next_is_valid)
+from ..models import User, db
+
+
+auth = Blueprint('auth', __name__, template_folder="templates")
 
 
 @auth.route('/confirm/<token>')
@@ -38,34 +40,37 @@ def resendConfirmEmail():
 
 @auth.route('/register', methods=['GET', 'POST'])
 def userRegister():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user = User.createAUser(name=form.name.data,
-                                email=form.email.data,
-                                password=form.password.data)
+    registerForm = RegisterForm()
+    if registerForm.validate_on_submit():
+        user = User.createAUser(name=registerForm.name.data,
+                                email=registerForm.email.data,
+                                password=registerForm.password.data)
         db.session.add(user)
         db.session.commit()
         login_user(user)
         token = user.generateConfirmToken()
         sendConfirmRegisteEmail(user, token)
         flash('确认注册邮件已发送至您的邮箱，请确认注册！')
+        print('register done!')
         return redirect(url_for('.waitConfirm'))
-    return render_template('auth/register.html', form=form)
+    return render_template('auth/loginAndRegister.html',
+                           registerForm=registerForm, loginForm=LoginForm())
 
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).get()
-        if user and user.checkPassword(form.password.data):
-            login_user(user, remember=form.rememberMe.data)
+    loginForm = LoginForm()
+    if loginForm.validate_on_submit():
+        user = User.query.filter_by(email=loginForm.email.data).get()
+        if user and user.checkPassword(loginForm.password.data):
+            login_user(user, remember=loginForm.rememberMe.data)
             next = request.args.get('next')
             if not next_is_valid(next):
                 return abort(400)
             return redirect(next or url_for('main.index'))
 
-    return render_template('auth/login.html', form=form)
+    return render_template('auth/loginAndRegister.html', loginForm=loginForm,
+                           registerForm=RegisterForm())
 
 
 @auth.route('/logout')
@@ -74,3 +79,8 @@ def logout():
     logout_user()
     flash('您已推出登录！')
     return redirect(url_for('main.index'))
+
+
+@auth.route('/test')
+def test():
+    return render_template('auth/test.html', form=LoginForm())

@@ -1,0 +1,50 @@
+.white-background {
+    background-color: #fff;
+}
+
+.gray-background {
+    background-color: #eee;
+}
+
+#top-navbar-search-form {
+    width: 400px;
+}
+
+#top-navbar-search-form .input-group {
+    width: 100%;
+}
+
+.square-corner {
+    border-radius: 0px;
+}
+
+.top-margin-sm {
+    margin-top: 12px;
+}
+
+.top-margin {
+    margin-top: 18px;
+}
+
+.top-margin-lg {
+    margin-top: 24px;
+}
+
+.nav-center {
+    text-align:center;
+}
+
+.nav-center > li {
+    float:none;
+    display:inline-block;
+    *display:inline;
+    zoom:1;
+}
+
+.logo-top-margin {
+    margin-top: 100px;
+}
+
+font-size-lg {
+    font-size: 20px;
+}
