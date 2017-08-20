@@ -1,0 +1,7 @@
+{% macro renderFormField(field, okAttributes, errorAttributes) %}
+{% if field.errors %}
+{{ field(**errorAttributes) }}
+{% else %}
+{{ field(**okAttributes) }}
+{% endif %}
+{% endmacro %}

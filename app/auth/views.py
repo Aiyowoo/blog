@@ -70,7 +70,7 @@ def login():
             return redirect(next or url_for('main.index'))
 
     return render_template('auth/loginAndRegister.html', loginForm=loginForm,
-                           registerForm=RegisterForm())
+                           registerForm=RegisterForm(), login=True)
 
 
 @auth.route('/logout')

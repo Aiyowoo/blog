@@ -13,8 +13,8 @@
     {% endblock css %}
 
     {% block js %}
-    <script src="{{ url_for('static', filename='js/jquery-3.2.1.js') }}", defer="defer"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}", defer="defer"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     {% endblock js %}
 
     <title>{% block title %}base{% endblock title %}</title>
