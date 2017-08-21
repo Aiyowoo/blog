@@ -45,6 +45,27 @@
     margin-top: 100px;
 }
 
-font-size-lg {
+.font-size-lg {
     font-size: 20px;
+}
+
+.box-3d {
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+}
+
+.left-padding-sm {
+    padding-left: 5px;
+}
+
+.right-padding-sm {
+    padding-right: 5px;
+}
+
+.left-margin-sm {
+    margin-left: 8px;
+}
+
+.right-margin-sm {
+    margin-right: 8px;
 }

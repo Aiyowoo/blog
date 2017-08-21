@@ -2,6 +2,7 @@ from flask_script import Manager, Shell, Command
 from app import db, createApp
 from app.models import (ArticleTag, Article, OriginalArticleFormatType,
                         Reply, Review, Role, Tag, User, Following)
+import log
 
 
 app = createApp()
@@ -32,4 +33,6 @@ manager.add_command('initDatabase', InitDatabaseCommand())
 
 
 if __name__ == '__main__':
+    log.queueListener.start()
     manager.run()
+    log.queueListener.stop()
