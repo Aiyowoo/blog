@@ -1,0 +1,6 @@
+<h1>亲爱的{{ user.name }}
+<h2>欢迎使用Blog!<small>记录您生活的点点滴滴。</small></h2>
+<p>请点击一下链接完成注册：
+    {{ url_for('auth.confirm', token=token, _external=True) }}
+</p>
+<p>The Blog Admin</p>
