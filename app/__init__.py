@@ -1,7 +1,6 @@
 from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
-from flask_bootstrap import Bootstrap
 from config import config
 from .auth import auth
 from .models import db, AnonymousUser, User
@@ -12,8 +11,6 @@ loginManager = LoginManager()
 loginManager.session_protection = "strong"
 loginManager.login_view = "auth.login"
 loginManager.anonymous_user = AnonymousUser
-
-bootstrap = Bootstrap()
 
 
 @loginManager.user_loader
@@ -33,7 +30,6 @@ def createApp():
     loginManager.init_app(app)
     db.init_app(app)
     mail.init_app(app)
-    bootstrap.init_app(app)
 
     app.register_blueprint(auth, url_prefix='/auth')
 

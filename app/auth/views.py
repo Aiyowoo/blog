@@ -61,13 +61,14 @@ def userRegister():
 def login():
     loginForm = LoginForm()
     if loginForm.validate_on_submit():
-        user = User.query.filter_by(email=loginForm.email.data).get()
+        user = User.query.filter_by(email=loginForm.email.data).first()
         if user and user.checkPassword(loginForm.password.data):
             login_user(user, remember=loginForm.rememberMe.data)
             next = request.args.get('next')
             if not next_is_valid(next):
                 return abort(400)
             return redirect(next or url_for('main.index'))
+        flash('用户名或密码错误！')
 
     return render_template('auth/loginAndRegister.html', loginForm=loginForm,
                            registerForm=RegisterForm(), login=True)
@@ -79,8 +80,3 @@ def logout():
     logout_user()
     flash('您已推出登录！')
     return redirect(url_for('main.index'))
-
-
-@auth.route('/test')
-def test():
-    return render_template('auth/test.html', form=LoginForm())

@@ -281,7 +281,7 @@ class User(UserMixin, db.Model):
     def generateConfirmToken(self):
         serializer = Serializer(current_app.config['CONFIRM_TOKEN_SECRET_KEY'],
                                 expires_in=3600)
-        return serializer.dumps({'confirmedUserId', self.id})
+        return serializer.dumps({'confirmedUserId': self.id})
 
     def confirm(self, token):
         '''

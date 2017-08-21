@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "macros/formHelper.html" import renderFormField %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% from "macros/utility.html" import renderFlashedMessages %}
 
 {% block title %}blog-记录生活的点点滴滴{% endblock title %}
 
@@ -28,9 +28,12 @@
             </div>
 
             <div id="login" class="row top-margin-lg">
+                {% if login %}
+                {{ renderFlashedMessages("danger") }}
+                {% endif %}
+
                 <form method="POST" action="{{ url_for('auth.login') }}">
                     {{ loginForm.hidden_tag() }}
-
 
                     {{ renderFormField(loginForm.email, {'class': 'form-control input-lg square-corner', 'placeholder': '邮箱'}, {'class': 'form-control input-lg square-corner', 'placeholder': '邮箱','data-toggle': 'popover', 'data-container': 'body', 'data-trigger': 'manual', 'data-placement': 'right', 'data-content': '\n'.join(loginForm.email.errors)}) }}
 
@@ -48,6 +51,10 @@
             </div>
 
             <div id="register" class="row top-margin-lg">
+                {% if not login %}
+                {{ renderFlashedMessages("danger") }}
+                {% endif %}
+
                 <form method="POST" action="{{ url_for('auth.userRegister') }}">
                     {{ registerForm.hidden_tag() }}
                     {{ renderFormField(registerForm.email, {'class': 'form-control input-lg square-corner', 'placeholder': '邮箱'}, {'class': 'form-control input-lg square-corner', 'placeholder': '邮箱','data-toggle': 'popover', 'data-container': 'body', 'data-trigger': 'manual', 'data-placement': 'right', 'data-content': '\n'.join(registerForm.email.errors)}) }}
