@@ -19,6 +19,7 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://{}:{}@localhost/blog?charset=utf8mb4".\
                               format(DATABASE_USERNAME, DATABASE_PASSWORD)
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
     # 邮件配置
     MAIL_SERVER = 'smtp.gmail.com'

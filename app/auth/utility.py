@@ -21,7 +21,7 @@ def unconfirmedRequired(func):
         if current_user.confirmed:
             flash('您已通过验证，无需再次验证！')
             return redirect(url_for('main.index'))
-        func(*args, **kwargs)
+        return func(*args, **kwargs)
     return wrappedFunc
 
 

@@ -69,3 +69,11 @@
 .right-margin-sm {
     margin-right: 8px;
 }
+
+.no-left-padding {
+    padding-left: 0px;
+}
+
+.no-padding {
+    padding: 0px;
+}

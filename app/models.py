@@ -299,7 +299,7 @@ class User(UserMixin, db.Model):
             return False
         except BadSignature:
             return False
-        if data.get('confirmUserId') != self.id:
+        if data.get('confirmedUserId') != self.id:
             return False
         self.confirmed = True
         db.session.add(self)

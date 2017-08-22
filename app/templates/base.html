@@ -48,7 +48,7 @@
                 </ul>
 
                 <!-- 在用户登陆后 -->
-                {% if current_user.is_authenticated() %}
+                {% if current_user.is_authenticated %}
                 <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="flase">{{ current_user.name }}</a>
