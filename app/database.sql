@@ -53,7 +53,7 @@ foreign key(createUserId) references Users(id)
 create table OriginalArticleFormatType(
 id int primary key auto_increment,
 -- 格式名
-name char not null
+name char(255) not null
 );
 
 -- 文章
@@ -67,9 +67,9 @@ userProfilePicture varchar(255) not null,
 -- 文章标题
 title varchar(255) not null,
 -- 标识原始文章的数据格式
-originalType int not null,
+originalTypeId int not null,
 -- 原始内容简介
-originalSummary char not null,
+originalSummary varchar(2048) not null,
 -- 原始文章内容
 originalContent text not null,
 -- 文章内容的第一章图片，在显示内容简介的时候可能会有用
@@ -225,3 +225,7 @@ delimiter ;
 insert Roles(name, permissions) values
 ('user', 255),
 ('admin', 255);
+
+
+insert OriginalArticleFormatType(id, name) values
+(1, 'tinymce');

@@ -52,12 +52,12 @@ class Article(db.Model):
     userName = db.Column(db.String(255), nullable=False)
     userProfilePicture = db.Column(db.String(255), nullable=False)
     title = db.Column(db.String(255), nullable=False)
-    originalType = db.Column(db.ForeignKey('OriginalArticleFormatType.id'),
-                             nullable=False, index=True)
+    originalTypeId = db.Column(db.ForeignKey('OriginalArticleFormatType.id'),
+                               nullable=False, index=True)
     originalSummary = db.Column(db.String(1), nullable=False)
     originalContent = db.Column(db.Text, nullable=False)
     firstContentPicture = db.Column(db.String(255))
-    summary = db.Column(db.String(1), nullable=False)
+    summary = db.Column(db.String(2048), nullable=False)
     content = db.Column(db.Text, nullable=False)
     creationDate = db.Column(db.DateTime, nullable=False,
                              server_default=text("CURRENT_TIMESTAMP"))
@@ -84,7 +84,7 @@ class OriginalArticleFormatType(db.Model):
     __tablename__ = 'OriginalArticleFormatType'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         return '<OriginalArticleFormatType id={}, name={}>'.\
@@ -338,6 +338,7 @@ def __generateFakeUsers(count):
         db.session.commit()
     except:
         db.session.rollback()
+        raise
 
 
 def __generateFakeTags(count):
@@ -358,11 +359,31 @@ def __generateFakeTags(count):
         db.session.commit()
     except:
         db.rollback()
+        raise
 
 
 def __generateFakeArticles(count):
     import forgery_py
+    from random import randint
     userCount = User.query.count()
     assert userCount, 'There is no user!'
     for i in range(count):
-        pass
+        user = User.query.offset(randint(0, userCount - 1)).first()
+        article = Article()
+        article.userId = user.id
+        article.userName = user.name
+        article.title = forgery_py.lorem_ipsum.title()
+        article.originalType = 1
+        article.summary = forgery_py.lorem_ipsum.sentences(randint(10, 20))
+        article.content = ''
+        article.originalSummary = ''
+        article.originalContent = ''
+        article.lastModifiedDate = forgery_py.date.date(True)
+
+        db.session.add(article)
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
