@@ -39,6 +39,10 @@ class ArticleTag(db.Model):
         return '<ArticleTag articleId={}, tagId={}, deleted={}>'.\
             format(self.articleId, self.tagId, self.creationDate)
 
+    @staticmethod
+    def generateFakes(count):
+        pass
+
 
 class Article(db.Model):
     __tablename__ = 'Articles'
@@ -180,7 +184,7 @@ class Tag(db.Model):
     __tablename__ = 'Tags'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1), nullable=False)
+    name = db.Column(db.String(1), nullable=False, unique=True)
     createUserId = db.Column(db.ForeignKey('Users.id'),
                              nullable=False, index=True)
     creationDate = db.Column(db.DateTime, nullable=False,
@@ -317,3 +321,48 @@ class AnonymousUser(AnonymousUserMixin):
 # Role.USER_ID = Role.query.filter_by(name='user').first().id
 # Role.ADMIN_ID = Role.query.filter_by(name='amdin').first().id
 
+
+def __generateFakeUsers(count):
+    import forgery_py
+    existedEmail = set(user.email for user in User.query.all())
+    for i in range(count):
+        email = forgery_py.internet.email_address()
+        if email not in existedEmail:
+            name = forgery_py.name.last_name()
+            user = User.createAUser(email=email, name=name)
+            user.password = 'wyljaaaa'
+            user.confirmed = True
+            db.session.add(user)
+            existedEmail.add(email)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+
+
+def __generateFakeTags(count):
+    import forgery_py
+    from random import randint
+    userCount = User.query.count()
+    assert userCount, 'There is no user!'
+    existedTagnames = set(tag.name for tag in Tag.query.all())
+    for i in count:
+        tagname = forgery_py.name.industry()
+        if tagname not in existedTagnames:
+            newTag = Tag(name=tagname,
+                         createUserId=randint(0, userCount - 1),
+                         createDate=forgery_py.date(True))
+            db.session.add(newTag)
+            existedTagnames.add(tagname)
+    try:
+        db.session.commit()
+    except:
+        db.rollback()
+
+
+def __generateFakeArticles(count):
+    import forgery_py
+    userCount = User.query.count()
+    assert userCount, 'There is no user!'
+    for i in range(count):
+        pass

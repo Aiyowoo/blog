@@ -42,3 +42,22 @@
 .article-block-info {
     margin-top: 10px;
 }
+
+.padding-sm {
+    padding: 5px 10px;
+}
+
+.padding-lg {
+    padding: 10px;
+}
+
+#user-info {
+    padding: 15px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
+}
+
+#user-info ul {
+    margin: 0px;
+}
