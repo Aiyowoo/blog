@@ -1,7 +1,8 @@
 from flask_script import Manager, Shell, Command
 from app import db, createApp
 from app.models import (ArticleTag, Article, OriginalArticleFormatType,
-                        Reply, Review, Role, Tag, User, Following)
+                        Reply, Review, Role, Tag, User, Following,
+                        generateFakeRecords)
 import log
 
 
@@ -29,7 +30,18 @@ class InitDatabaseCommand(Command):
         Role.insertRoles()
 
 
+class GenerateFakeRecordsCommand(Command):
+    """
+
+    生成测试用的虚假数据
+
+    """
+    def run(self):
+        generateFakeRecords()
+
+
 manager.add_command('initDatabase', InitDatabaseCommand())
+manager.add_command('generateFakeRecords', GenerateFakeRecordsCommand())
 
 
 if __name__ == '__main__':

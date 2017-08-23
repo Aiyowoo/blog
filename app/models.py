@@ -39,10 +39,6 @@ class ArticleTag(db.Model):
         return '<ArticleTag articleId={}, tagId={}, deleted={}>'.\
             format(self.articleId, self.tagId, self.creationDate)
 
-    @staticmethod
-    def generateFakes(count):
-        pass
-
 
 class Article(db.Model):
     __tablename__ = 'Articles'
@@ -50,11 +46,11 @@ class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.ForeignKey('Users.id'), nullable=False, index=True)
     userName = db.Column(db.String(255), nullable=False)
-    userProfilePicture = db.Column(db.String(255), nullable=False)
+    userProfilePicture = db.Column(db.String(255))
     title = db.Column(db.String(255), nullable=False)
     originalTypeId = db.Column(db.ForeignKey('OriginalArticleFormatType.id'),
                                nullable=False, index=True)
-    originalSummary = db.Column(db.String(1), nullable=False)
+    originalSummary = db.Column(db.String(2048), nullable=False)
     originalContent = db.Column(db.Text, nullable=False)
     firstContentPicture = db.Column(db.String(255))
     summary = db.Column(db.String(2048), nullable=False)
@@ -184,7 +180,7 @@ class Tag(db.Model):
     __tablename__ = 'Tags'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(1), nullable=False, unique=True)
+    name = db.Column(db.String(255), nullable=False, unique=True)
     createUserId = db.Column(db.ForeignKey('Users.id'),
                              nullable=False, index=True)
     creationDate = db.Column(db.DateTime, nullable=False,
@@ -209,11 +205,13 @@ class Following(db.Model):
 
     followedUser = db.relationship('User',
                                    primaryjoin='Following.userId == User.id',
-                                   backref=db.backref('followedRecords'),
+                                   backref=db.backref('followerRecords',
+                                                      lazy='dynamic'),
                                    uselist=False)
     follower = db.relationship('User',
                                primaryjoin='Following.followerId == User.id',
-                               backref=db.backref('followerRecords'),
+                               backref=db.backref('followedRecords',
+                                                  lazy='dynamic'),
                                uselist=False)
 
 
@@ -347,18 +345,18 @@ def __generateFakeTags(count):
     userCount = User.query.count()
     assert userCount, 'There is no user!'
     existedTagnames = set(tag.name for tag in Tag.query.all())
-    for i in count:
+    for i in range(count):
         tagname = forgery_py.name.industry()
         if tagname not in existedTagnames:
             newTag = Tag(name=tagname,
-                         createUserId=randint(0, userCount - 1),
-                         createDate=forgery_py.date(True))
+                         createUserId=randint(1, userCount - 1),
+                         creationDate=forgery_py.date.date(True))
             db.session.add(newTag)
             existedTagnames.add(tagname)
     try:
         db.session.commit()
     except:
-        db.rollback()
+        db.session.rollback()
         raise
 
 
@@ -373,7 +371,7 @@ def __generateFakeArticles(count):
         article.userId = user.id
         article.userName = user.name
         article.title = forgery_py.lorem_ipsum.title()
-        article.originalType = 1
+        article.originalTypeId = 1
         article.summary = forgery_py.lorem_ipsum.sentences(randint(10, 20))
         article.content = ''
         article.originalSummary = ''
@@ -387,3 +385,53 @@ def __generateFakeArticles(count):
     except:
         db.session.rollback()
         raise
+
+
+def __generateFakeArticleTags():
+    from random import randint, choice
+    articles = Article.query.all()
+    tags = Tag.query.all()
+    for article in articles:
+        attachedTags = set()
+        for i in range(randint(0, 3)):
+            attachedTags.add(choice(tags))
+        for tag in attachedTags:
+            record = ArticleTag()
+            record.article = article
+            record.tag = tag
+            db.session.add(record)
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+
+
+def __generateFakeFollowings(count):
+    from random import choice
+    userIds = [user.id for user in User.query.all()]
+    existedFollowings = set((following.userId, following.followerId)
+                            for following in Following.query.all())
+    for i in range(count):
+        userId = choice(userIds)
+        followerId = choice(userIds)
+        if userId != followerId and \
+           (userId, followerId) not in existedFollowings:
+            following = Following(userId=userId, followerId=followerId)
+            db.session.add(following)
+            existedFollowings.add((userId, followerId))
+
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+
+
+def generateFakeRecords():
+    __generateFakeUsers(10)
+    __generateFakeTags(100)
+    __generateFakeArticles(1000)
+    __generateFakeArticleTags()
+    __generateFakeFollowings(20)

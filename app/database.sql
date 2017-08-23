@@ -42,7 +42,7 @@ foreign key(followerId) references Users(id)
 -- tag创建后就不能删除
 create table Tags(
 id int primary key auto_increment,
-name char not null unique,
+name char(255) not null unique,
 createUserId int not null,
 creationDate timestamp not null default CURRENT_TIMESTAMP,
 
@@ -63,7 +63,7 @@ id int primary key auto_increment,
 userId int not null,
 -- 因为需要经常查询用户名和用户头像所以做下冗余
 userName varchar(255) not null,
-userProfilePicture varchar(255) not null,
+userProfilePicture varchar(255),
 -- 文章标题
 title varchar(255) not null,
 -- 标识原始文章的数据格式
@@ -75,7 +75,7 @@ originalContent text not null,
 -- 文章内容的第一章图片，在显示内容简介的时候可能会有用
 firstContentPicture varchar(255),
 -- 转化为html后的内容简介
-summary char not null,
+summary varchar(2048) not null,
 -- 转化为html后的文章内容
 content text not null,
 -- 创建时间
@@ -94,7 +94,7 @@ reviewCount int default 0,
 deleted bool not null default false,
 
 foreign key(userId) references Users(id),
-foreign key(originalType) references OriginalArticleFormatType(id)
+foreign key(originalTypeId) references OriginalArticleFormatType(id)
 );
 
 create table ArticleTags(

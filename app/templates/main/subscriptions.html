@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "macros/utility.html" import renderArticle %}
+{% from "macros/utility.html" import renderPagination, renderFlashedMessages %}
+
+{% block css %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/main/base.css') }}" rel="stylesheet"/>
+{% endblock css %}
+
+{% block title %}Blog-首页{% endblock title %}
+
+
+{% block subscriptionsActived %}class="active"{% endblock subscriptionsActived %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-9">
+
+                {{ renderFlashedMessages('warning') }}
+
+                {% if not followedCount %}
+                <div id="not-follow-info">
+                    <h4>您还未关注任何人，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>
+                </div>
+                {% elif not pagination or not pagination.items %}
+
+                <div id ="no-article-info">
+                    <h4>您已关注{{ followedCount }}人，但并没有文章...<small><a href="{{ url_for('main.index') }}">去逛逛？</a></small></h4>
+                </div>
+
+                {% else %}
+
+                <div id="summary-block">
+                    <span class="label label-info font-size-lg padding-sm">已关注 <span class="badge">12</span></span>
+                    <span class="label label-info font-size-lg padding-sm">文章 <span class="badge">110</span></span>
+                </div>
+
+                {% for article in pagination.items %}
+                {{ renderArticle(article) }}
+                {% endfor %}
+
+                <div id="pagination">
+                    <center>
+                        {{ renderPagination(pagination, '.index') }}
+                    </center>
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <div id="user-info" class="col-sm-3">
+                {% if current_user.is_authenticated %}
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <span class="badge">{{ current_user.articles.count() }}</span>我的文章
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{ current_user.followedRecords.count() }}</span>我关注的人
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">{{ current_user.followerRecords.count() }}</span>关注者
+                    </li>
+                    <!-- <li class="list-group-item"> -->
+                    <!-- <span class="badge">0</span>我收获的赞 -->
+                    <!-- </li> -->
+                </ul>
+                {% else %}
+                <h4 class="text-center">您还未登录</h4>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}

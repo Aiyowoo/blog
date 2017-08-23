@@ -12,6 +12,6 @@ def exceptionHandler(logger, info):
             except:
                 logger.exception(info)
                 db.session.rollback()
-                abort(500)
+                raise
         return handler
     return wrapper

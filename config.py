@@ -30,6 +30,8 @@ class BaseConfig:
     BLOG_MAIL_SUBJECT_PREFIX = '[Blog]'
     BLOG_MAIL_SENDER = '[BLOG] ADMIN'
 
+    ARTICLE_COUNT_PER_PAGE = 12
+
     @staticmethod
     def initApp(app):
         app.config.from_object(BaseConfig)

@@ -32,6 +32,6 @@ def createApp():
     mail.init_app(app)
 
     app.register_blueprint(auth, url_prefix='/auth')
-    app.register_blueprint(main, url_prefix='/')
+    app.register_blueprint(main, url_prefix='')
 
     return app

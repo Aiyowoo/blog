@@ -12,3 +12,79 @@
 {% endif %}
 {% endwith %}
 {% endmacro %}
+
+
+{% macro renderArticle(article) %}
+<div class="article-block">
+    <div class="article-block-author-info">
+        <a>
+            <img src="{{ url_for('static', filename=(article.userProfilePicture or 'img/userPictures/default.jpg')) }}" />
+            <h5>{{ article.userName }}</h5>
+        </a> {{ article.lastModifiedDate }}
+    </div>
+
+    <div class="article-block-article">
+        {% if article.firstContentPicture %}
+        <div class="col-sm-9 no-padding">
+            {% else %}
+            <div class="col-sm-10 no-padding">
+            {% endif %}
+
+            <h4>{{ article.title }}</h4>
+            <p>{{ article.summary }}</p>
+        </div>
+
+        {% if article.firstContentPicture %}
+        <div class="col-sm-3">
+            <img src="{{ article.firstContentPicture }}" class="img-responsive" />
+        </div>
+        {% endif %}
+
+    </div>
+
+    <div class="article-block-info">
+        {% with tagRecords = article.tagRecords.all() %}
+        {% if tagRecords %}
+        {% for tagRecord in tagRecords %}
+        <a><span class="label label-info">{{ tagRecord.tag.name }}</span></a>
+        {% endfor %}
+        {% else %}
+        <a><span class="label label-info">其他</span></a>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+{% endmacro %}
+
+
+{% macro renderPagination(pagination, endpoint) %}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li {% if not pagination.has_prev %} class="disabled" {% endif %}>
+            <a href="{% if pagination.has_prev %}{{ url_for(endpoint, pageNo=pagination.page - 1) }}{% else %}#{% endif %}">&laquo;</a>
+        </li>
+
+        {% for p in pagination.iter_pages() %}
+        {% if p %}
+        {% if p == pagination.page %}
+        <li class="active">
+            <a href="{{ url_for(endpoint, pageNo=p) }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li>
+            <a href="{{ url_for(endpoint, pageNo=p) }}">{{ p }}</a>
+        </li>
+        {% endif %}
+        {% else %}
+        <li class="disabled"><a href="#">&hellip;</a></li>
+        {% endif %}
+        {% endfor %}
+
+        <li {% if not pagination.has_next %} class="disabled" {% endif %}>
+            <a href="{% if pagination.has_next %}{{ url_for(endpoint, pageNo=pagination.page + 1) }}{% else %}#{% endif %}">&raquo;</a>
+        </li>
+    </ul>
+</nav>
+
+{% endmacro %}
