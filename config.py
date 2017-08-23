@@ -31,6 +31,7 @@ class BaseConfig:
     BLOG_MAIL_SENDER = '[BLOG] ADMIN'
 
     ARTICLE_COUNT_PER_PAGE = 12
+    HOT_TAG_COUNT = 9
 
     @staticmethod
     def initApp(app):

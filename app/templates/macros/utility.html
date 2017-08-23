@@ -88,3 +88,23 @@
 </nav>
 
 {% endmacro %}
+
+
+{% macro renderUserInfo(user) %}
+
+<ul class="list-group">
+    <li class="list-group-item">
+        <span class="badge">{{ user.articles.count() }}</span>我的文章
+    </li>
+    <li class="list-group-item">
+        <span class="badge">{{ user.followedRecords.count() }}</span>我关注的人
+    </li>
+    <li class="list-group-item">
+        <span class="badge">{{ user.followerRecords.count() }}</span>关注者
+    </li>
+    <!-- <li class="list-group-item"> -->
+    <!-- <span class="badge">0</span>我收获的赞 -->
+    <!-- </li> -->
+</ul>
+
+{% endmacro %}

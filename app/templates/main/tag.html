@@ -22,19 +22,17 @@
 
                 {% if not followedCount %}
                 <div id="not-follow-info">
-                    <h4>您还未关注任何人，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>
+                    <h4>您还未关注任何主题，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>
                 </div>
                 {% elif not pagination or not pagination.items %}
 
                 <div id ="no-article-info">
-                    <h4>您已关注{{ followedCount }}人，但并没有文章...<small><a href="{{ url_for('main.index') }}">去逛逛？</a></small></h4>
+                    <h4>您已关注{{ followedCount }}个主题，但并没有文章...<small><a href="{{ url_for('main.index') }}">去逛逛？</a></small></h4>
                 </div>
 
                 {% else %}
 
                 <div id="summary-block">
-                    <span class="label label-info font-size-lg padding-sm">已关注 <span class="badge">{{ current_user.followedRecords.count() }}</span></span>
-                    <span class="label label-info font-size-lg padding-sm">文章 <span class="badge">{{ current_user.getFollowedArticleCount() }}</span></span>
                 </div>
 
                 {% for article in pagination.items %}

@@ -1,7 +1,7 @@
 # coding: utf-8
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
+from sqlalchemy import text, func, desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -180,7 +180,7 @@ class Tag(db.Model):
     __tablename__ = 'Tags'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False, unique=True)
+    name = db.Column(db.String(128), nullable=False, unique=True)
     createUserId = db.Column(db.ForeignKey('Users.id'),
                              nullable=False, index=True)
     creationDate = db.Column(db.DateTime, nullable=False,
@@ -191,6 +191,20 @@ class Tag(db.Model):
     def __repr__(self):
         return '<Tag id={}, name={}, creationDate={}>'.\
             format(self.id, self.name, self.creationDate)
+
+    @staticmethod
+    def getHotTags(count):
+        """
+
+        获取前count个比较热门的主题
+
+        """
+        stmt = (db.session.query(ArticleTag.tagId,
+                                 func.count('*').label('count')).
+                group_by(ArticleTag.tagId).
+                order_by(desc(func.count('*'))).limit(count).subquery())
+        return (db.session.query(Tag).join(stmt, Tag.id == stmt.c.tagId).
+                order_by(desc(stmt.c.count)).all())
 
 
 class Following(db.Model):
@@ -309,6 +323,12 @@ class User(UserMixin, db.Model):
 
     def can(self, permission):
         return self.role.permissions & permission
+
+    def getFollowedArticleCount(self):
+        stmt = (db.session.query(Following.userId).
+                filter(Following.followerId == self.id)).subquery()
+        return (db.session.query(Article).
+                join(stmt, Article.userId == stmt.c.userId).count())
 
 
 class AnonymousUser(AnonymousUserMixin):

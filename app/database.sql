@@ -42,7 +42,7 @@ foreign key(followerId) references Users(id)
 -- tag创建后就不能删除
 create table Tags(
 id int primary key auto_increment,
-name char(255) not null unique,
+name char(128) not null unique,
 createUserId int not null,
 creationDate timestamp not null default CURRENT_TIMESTAMP,
 
