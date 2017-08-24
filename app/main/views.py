@@ -1,5 +1,6 @@
-from flask import (render_template, Blueprint, current_app, request)
+from flask import (render_template, Blueprint, current_app, request, abort)
 from flask_login import login_required, current_user
+from sqlalchemy import desc
 from .logger import logger
 from ..models import Article, Tag
 from ..utility import exceptionHandler
@@ -13,7 +14,7 @@ main = Blueprint('main', __name__, template_folder="templates")
 def index():
     pageNoStr = request.args.get('pageNo')
     pageNo = int(pageNoStr) if pageNoStr else 1
-    pagination = (Article.query.order_by(Article.creationDate).
+    pagination = (Article.query.order_by(desc(Article.creationDate)).
                   paginate(pageNo,
                            current_app.config['ARTICLE_COUNT_PER_PAGE'],
                            False))
@@ -35,10 +36,35 @@ def subscriptions():
     if followedUserIds:
         pagination = Article.query.\
                      filter(Article.userId.in_(followedUserIds)).\
-                     order_by(Article.creationDate).\
+                     order_by(desc(Article.creationDate)).\
                      paginate(pageNo,
                               current_app.config['ARTICLE_COUNT_PER_PAGE'],
                               False)
     return render_template('main/subscriptions.html',
                            followedCount=len(followedUserIds),
                            pagination=pagination)
+
+
+@main.route('/concernedTags')
+@login_required
+@exceptionHandler(logger, 'failed to visit /concernedTags')
+def concernedTags():
+    concernedTags = current_user.concernedTags.all()
+    if concernedTags:
+        try:
+            tagId = int(request.args.get('tagId') or concernedTags[0].id)
+            pageNo = int(request.args.get('pageNo') or 1)
+            if tagId not in (tag.id for tag in concernedTags):
+                raise ValueError("{} didn't concerned tag {}".
+                                 format(current_user, tagId))
+        except:
+            abort(400)
+
+    stmt = Tag.query.get(tagId).articleRecords.subquery()
+    pagination = (Article.query.join(stmt, stmt.c.articleId == Article.id).
+                  order_by(desc(Article.creationDate)).
+                  paginate(pageNo,
+                           current_app.config['ARTICLE_COUNT_PER_PAGE']))
+
+    return render_template('main/tag.html', currentTagId=tagId,
+                           concernedTags=concernedTags, pagination=pagination)

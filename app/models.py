@@ -1,7 +1,7 @@
 # coding: utf-8
 from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, func, desc
+from sqlalchemy import text, func, desc, Table
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -207,6 +207,13 @@ class Tag(db.Model):
                 order_by(desc(stmt.c.count)).all())
 
 
+t_CencernedTags = Table(
+    'ConcernedTags', db.Model.metadata,
+    db.Column('userId', db.ForeignKey('Users.id'), primary_key=True, nullable=False),
+    db.Column('tagId', db.ForeignKey('Tags.id'), primary_key=True, nullable=False, index=True)
+)
+
+
 class Following(db.Model):
     __tablename__ = 'Following'
 
@@ -247,6 +254,7 @@ class User(UserMixin, db.Model):
 
     role = db.relationship('Role', uselist=False,
                            backref=db.backref('users', lazy='dynamic'))
+    concernedTags = db.relationship('Tag', secondary=t_CencernedTags, lazy='dynamic')
 
     @staticmethod
     def createAUser(*args, **kwargs):
@@ -380,6 +388,23 @@ def __generateFakeTags(count):
         raise
 
 
+def __generateFakeConcernedRecords(count):
+    from random import choice
+    existed = set()
+    users = User.query.all()
+    tags = Tag.query.all()
+    for i in range(count):
+        user = choice(users)
+        tag = choice(tags)
+        if (user.id, tag.id) not in existed:
+            user.concernedTags.append(tag)
+    try:
+        db.session.commit()
+    except:
+        db.session.rollback()
+        raise
+
+
 def __generateFakeArticles(count):
     import forgery_py
     from random import randint
@@ -452,6 +477,7 @@ def __generateFakeFollowings(count):
 def generateFakeRecords():
     __generateFakeUsers(10)
     __generateFakeTags(100)
+    __generateFakeConcernedRecords(100)
     __generateFakeArticles(1000)
     __generateFakeArticleTags()
     __generateFakeFollowings(20)

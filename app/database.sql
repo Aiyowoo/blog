@@ -49,6 +49,15 @@ creationDate timestamp not null default CURRENT_TIMESTAMP,
 foreign key(createUserId) references Users(id)
 );
 
+-- 记录用户关注的tags
+create table ConcernedTags (
+userId int not null,
+tagId int not null,
+foreign key(userId) references Users(id),
+foreign key(tagId) references Tags(id),
+primary key(userId, tagId)
+);
+
 -- 表示上传上来的原始文章的格式类型
 create table OriginalArticleFormatType(
 id int primary key auto_increment,
