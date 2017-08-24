@@ -254,7 +254,8 @@ class User(UserMixin, db.Model):
 
     role = db.relationship('Role', uselist=False,
                            backref=db.backref('users', lazy='dynamic'))
-    concernedTags = db.relationship('Tag', secondary=t_CencernedTags, lazy='dynamic')
+    concernedTags = db.relationship('Tag', secondary=t_CencernedTags, lazy='dynamic',
+                                    db.backref=db.backref('followers', lazy='dynamic'))
 
     @staticmethod
     def createAUser(*args, **kwargs):

@@ -66,5 +66,21 @@ def concernedTags():
                   paginate(pageNo,
                            current_app.config['ARTICLE_COUNT_PER_PAGE']))
 
-    return render_template('main/tag.html', currentTagId=tagId,
+    return render_template('main/concernedTags.html', currentTagId=tagId,
                            concernedTags=concernedTags, pagination=pagination)
+
+
+@main.route('/showTag/<int:tagId>')
+@exceptionHandler(logger, 'failed to show tag')
+def showTag(tagId):
+    tag = Tag.query.get_or_404(tagId)
+    pageNo = int(request.args.get('pageNo') or 1)
+    hot = request.args.get('hot')
+    order = desc(Article.viewedCount) if hot else desc(Article.creationDate)
+
+    stmt = tag.articles.subquery()
+    pagination = (Article.query.join(stmt, Article.id == stmt.c.id).
+                  order_by(order).
+                  paginate(pageNo, current_app.config['ARTICLE_COUNT_PER_PAGE']))
+
+    return render_template('main/showTag.html', tag=tag, pagination=pagination)
