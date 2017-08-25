@@ -1,0 +1,22 @@
+.tag-info {
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
+    padding: 10px 15px;
+}
+
+.tag-info ul {
+    padding: 0px;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.tag-info ul li {
+    border-right: 1px solid #ccc;
+    display: inline-block;
+    padding: 0px 20px;
+}
+
+.tag-info ul li:last-child {
+    border-right-width: 0px;
+}

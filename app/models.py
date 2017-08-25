@@ -193,24 +193,36 @@ class Tag(db.Model):
             format(self.id, self.name, self.creationDate)
 
     @staticmethod
-    def getHotTags(count):
+    def getHotTagRecords(count):
         """
 
-        获取前count个比较热门的主题
+        获取前count个比较热门的主题，该主题下文章数量（排除已删除的）
 
         """
+        invalidArticleIds = (db.session.query(Article.id).
+                             filter(Article.deleted == True))
+        # stmt = (db.session.query(ArticleTag.tagId,
+        #                          func.count('*').label('count')).
+        #         join(invalidArticleIds,
+        #              ArticleTag.articleId == invalidArticleIds.c.id).
+        #         group_by(ArticleTag.tagId).
+        #         order_by(desc(func.count('*'))).limit(count).subquery())
         stmt = (db.session.query(ArticleTag.tagId,
                                  func.count('*').label('count')).
+                filter(ArticleTag.articleId.notin_(invalidArticleIds)).
                 group_by(ArticleTag.tagId).
                 order_by(desc(func.count('*'))).limit(count).subquery())
-        return (db.session.query(Tag).join(stmt, Tag.id == stmt.c.tagId).
+        return (db.session.query(Tag, stmt.c.count).
+                join(stmt, Tag.id == stmt.c.tagId).
                 order_by(desc(stmt.c.count)).all())
 
 
 t_CencernedTags = Table(
     'ConcernedTags', db.Model.metadata,
-    db.Column('userId', db.ForeignKey('Users.id'), primary_key=True, nullable=False),
-    db.Column('tagId', db.ForeignKey('Tags.id'), primary_key=True, nullable=False, index=True)
+    db.Column('userId', db.ForeignKey('Users.id'),
+              primary_key=True, nullable=False),
+    db.Column('tagId', db.ForeignKey('Tags.id'),
+              primary_key=True, nullable=False, index=True)
 )
 
 
@@ -254,8 +266,10 @@ class User(UserMixin, db.Model):
 
     role = db.relationship('Role', uselist=False,
                            backref=db.backref('users', lazy='dynamic'))
-    concernedTags = db.relationship('Tag', secondary=t_CencernedTags, lazy='dynamic',
-                                    db.backref=db.backref('followers', lazy='dynamic'))
+    concernedTags = db.relationship('Tag', secondary=t_CencernedTags,
+                                    lazy='dynamic',
+                                    backref=db.backref('followers',
+                                                       lazy='dynamic'))
 
     @staticmethod
     def createAUser(*args, **kwargs):

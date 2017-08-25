@@ -20,7 +20,7 @@
         <a>
             <img src="{{ url_for('static', filename=(article.userProfilePicture or 'img/userPictures/default.jpg')) }}" />
             <h5>{{ article.userName }}</h5>
-        </a> {{ article.lastModifiedDate }}
+        </a> {{ article.creationDate }}
     </div>
 
     <div class="article-block-article">
@@ -46,7 +46,7 @@
         {% with tagRecords = article.tagRecords.all() %}
         {% if tagRecords %}
         {% for tagRecord in tagRecords %}
-        <a><span class="label label-info">{{ tagRecord.tag.name }}</span></a>
+        <a href="{{ url_for('main.showTag', tagId=tagRecord.tagId) }}"><span class="label label-info">{{ tagRecord.tag.name }}</span></a>
         {% endfor %}
         {% else %}
         <a><span class="label label-info">其他</span></a>
@@ -105,6 +105,20 @@
     <!-- <li class="list-group-item"> -->
     <!-- <span class="badge">0</span>我收获的赞 -->
     <!-- </li> -->
+</ul>
+
+{% endmacro %}
+
+
+{% macro renderFamousUserRecords(famousUserRecords) %}
+
+<ul class="list-group">
+    <h5>主题下活跃用户：</h5>
+    {% for user, count in famousUserRecords %}
+    <li class="list-group-item">
+        <span class="badge">{{ count }}</span>{{ user.name }}
+    </li>
+    {% endfor %}
 </ul>
 
 {% endmacro %}

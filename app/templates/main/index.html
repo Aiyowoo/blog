@@ -44,12 +44,14 @@
             </div>
 
             <div id="extra-info" class="col-sm-3">
-                {% if hotTags %}
+                {% if hotTagRecords %}
+
+                <h5>热门主题：</h5>
 
                 <ul class="list-group">
-                    {% for tag in hotTags %}
+                    {% for tag, count in hotTagRecords %}
                     <li class="list-group-item">
-                        <span class="badge">{{ tag.articleRecords.count() }}</span>{{ tag.name }}
+                        <span class="badge">{{ count }}</span>{{ tag.name }}
                     </li>
                     {% endfor %}
                 </ul>

@@ -1,8 +1,8 @@
 from flask import (render_template, Blueprint, current_app, request, abort)
 from flask_login import login_required, current_user
-from sqlalchemy import desc
+from sqlalchemy import desc, func, and_
 from .logger import logger
-from ..models import Article, Tag
+from ..models import Article, Tag, ArticleTag, db, User, Following
 from ..utility import exceptionHandler
 
 
@@ -14,13 +14,14 @@ main = Blueprint('main', __name__, template_folder="templates")
 def index():
     pageNoStr = request.args.get('pageNo')
     pageNo = int(pageNoStr) if pageNoStr else 1
-    pagination = (Article.query.order_by(desc(Article.creationDate)).
+    pagination = (Article.query.filter(Article.deleted == False).
+                  order_by(desc(Article.creationDate)).
                   paginate(pageNo,
                            current_app.config['ARTICLE_COUNT_PER_PAGE'],
                            False))
     return render_template('main/index.html', pagination=pagination,
-                           hotTags=Tag.
-                           getHotTags(current_app.config['HOT_TAG_COUNT']))
+                           hotTagRecords=Tag.
+                           getHotTagRecords(current_app.config['HOT_TAG_COUNT']))
 
 
 @main.route('/subscriptions')
@@ -28,20 +29,26 @@ def index():
 @exceptionHandler(logger, "failed to get subscriptions")
 def subscriptions():
     # subscription 订阅
-    pageNo = request.args.get('pageNo') or 1
-    pageNo = int(pageNo)
-    followedUserIds = [record.userId for record in
-                       current_user.followedRecords.all()]
+    try:
+        pageNo = int(request.args.get('pageNo') or 1)
+    except:
+        abort(400)
+
+    followedUserIdsQuery = (db.session.query(Following.userId).
+                            filter(Following.followerId == current_user.id))
+    followedCount = followedUserIdsQuery.count()
+
     pagination = None
-    if followedUserIds:
-        pagination = Article.query.\
-                     filter(Article.userId.in_(followedUserIds)).\
-                     order_by(desc(Article.creationDate)).\
-                     paginate(pageNo,
-                              current_app.config['ARTICLE_COUNT_PER_PAGE'],
-                              False)
+    if followedCount:
+        pagination = (db.session.query(Article).
+                      filter(and_(Article.deleted == False,
+                                  Article.userId.in_(followedUserIdsQuery))).
+                      order_by(desc(Article.creationDate)).
+                      paginate(pageNo,
+                               current_app.config['ARTICLE_COUNT_PER_PAGE'],
+                               False))
     return render_template('main/subscriptions.html',
-                           followedCount=len(followedUserIds),
+                           followedCount=followedCount,
                            pagination=pagination)
 
 
@@ -61,10 +68,12 @@ def concernedTags():
             abort(400)
 
     stmt = Tag.query.get(tagId).articleRecords.subquery()
-    pagination = (Article.query.join(stmt, stmt.c.articleId == Article.id).
+    pagination = (Article.query.filter(Article.deleted == False).
+                  join(stmt, stmt.c.articleId == Article.id).
                   order_by(desc(Article.creationDate)).
                   paginate(pageNo,
-                           current_app.config['ARTICLE_COUNT_PER_PAGE']))
+                           current_app.config['ARTICLE_COUNT_PER_PAGE'],
+                           False))
 
     return render_template('main/concernedTags.html', currentTagId=tagId,
                            concernedTags=concernedTags, pagination=pagination)
@@ -74,13 +83,31 @@ def concernedTags():
 @exceptionHandler(logger, 'failed to show tag')
 def showTag(tagId):
     tag = Tag.query.get_or_404(tagId)
-    pageNo = int(request.args.get('pageNo') or 1)
-    hot = request.args.get('hot')
-    order = desc(Article.viewedCount) if hot else desc(Article.creationDate)
+    try:
+        pageNo = int(request.args.get('pageNo') or 1)
+    except:
+        abort(400)
 
-    stmt = tag.articles.subquery()
-    pagination = (Article.query.join(stmt, Article.id == stmt.c.id).
-                  order_by(order).
+    order = (desc(Article.viewedCount) if request.args.get('hot')
+             else desc(Article.creationDate))
+
+    articleIdsQuery = (db.session.query(ArticleTag.articleId).
+                       filter(ArticleTag.tagId == tag.id).subquery())
+    pagination = (Article.query.filter(Article.deleted == False).
+                  join(stmt, Article.id == articleIdsQuery.c.articleId).
+                  order_by(order).order_by(desc(Article.creationDate)).
                   paginate(pageNo, current_app.config['ARTICLE_COUNT_PER_PAGE']))
 
-    return render_template('main/showTag.html', tag=tag, pagination=pagination)
+    stmt = db.session.query(ArticleTag.articleId).filter(ArticleTag.tagId == tag.id).subquery()
+    stmt2 = (db.session.query(Article.userId, func.count(Article.id).label('count')).
+             filter(Article.deleted == False).
+             join(stmt, stmt.c.articleId == Article.id).
+             group_by(Article.userId).order_by(desc(func.count(Article.id))).
+             limit(current_app.config['FAMOUS_USER_COUNT'])).subquery()
+    famousUserRecords = (db.session.query(User, stmt2.c.count).
+                         join(stmt2, User.id == stmt2.c.userId).
+                         order_by(desc(stmt2.c.count)).all())
+
+    return render_template('main/showTag.html', tag=tag,
+                           pagination=pagination,
+                           famousUserRecords=famousUserRecords)
