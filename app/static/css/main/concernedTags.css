@@ -1,0 +1,43 @@
+.tag-category-container {
+    padding: 18px 18px 10px 18px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+ul.tag-category {
+    list-style-type: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+ul.tag-category li {
+    margin: 0 10px 10px;
+    border: 1px solid #aaa;
+    padding: 0px 10px;
+    border-radius: 15px;
+    display: inline-block;
+}
+
+ul.tag-category li:hover {
+    background-color: #06c;
+    color: #fff;
+}
+
+ul.tag-category li:hover a {
+    color: #fff;
+}
+
+ul.tag-category li a {
+    text-decoration: none;
+}
+
+ul.tag-category li.active {
+    background-color: #06c;
+    color: #fff;
+}
+
+ul.tag-category li.active a {
+    color: #fff;
+}

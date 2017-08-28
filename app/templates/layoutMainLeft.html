@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container">
+
+    <div id="main" class="col-sm-9">
+        {% block main %}
+        {% endblock main %}
+    </div>
+
+    <div id="extra" class="col-sm-3">
+        {% block extra %}
+        {% endblock extra %}
+    </div>
+
+</div>
+
+{% endblock content %}
