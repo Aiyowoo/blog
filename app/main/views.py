@@ -94,7 +94,7 @@ def showTag(tagId):
     articleIdsQuery = (db.session.query(ArticleTag.articleId).
                        filter(ArticleTag.tagId == tag.id).subquery())
     pagination = (Article.query.filter(Article.deleted == False).
-                  join(stmt, Article.id == articleIdsQuery.c.articleId).
+                  join(articleIdsQuery, Article.id == articleIdsQuery.c.articleId).
                   order_by(order).order_by(desc(Article.creationDate)).
                   paginate(pageNo, current_app.config['ARTICLE_COUNT_PER_PAGE']))
 

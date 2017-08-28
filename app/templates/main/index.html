@@ -1,11 +1,13 @@
-{% extends "base.html" %}
+{% extends "layoutMainLeft.html" %}
 {% from "macros/utility.html" import renderArticle %}
 {% from "macros/utility.html" import renderPagination, renderFlashedMessages %}
 
+
 {% block css %}
 {{ super() }}
-<link href="{{ url_for('static', filename='css/main/base.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/renderArticle.css') }}" rel="stylesheet"/>
 {% endblock css %}
+
 
 {% block title %}Blog-首页{% endblock title %}
 
@@ -13,57 +15,51 @@
 {% block homeActived %}class="active"{% endblock homeActived %}
 
 
-{% block content %}
-    <div class="container">
-        <div class="row">
+{% block main %}
 
-            <div class="col-sm-9">
+{{ renderFlashedMessages('warning') }}
 
-                {{ renderFlashedMessages('warning') }}
+{% if pagination and pagination.items %}
 
-                {% if pagination and pagination.items %}
+{% for article in pagination.items %}
+{{ renderArticle(article) }}
+{% endfor %}
 
-                {% for article in pagination.items %}
-                {{ renderArticle(article) }}
-                {% endfor %}
+<div id="pagination">
+    <center>
+        {{ renderPagination(pagination, 'main.index') }}
+    </center>
+</div>
 
-                <div id="pagination">
-                    <center>
-                        {{ renderPagination(pagination, 'main.index') }}
-                    </center>
-                </div>
+{% else %}
 
-                {% else %}
+<div class="box-3d">
+    <h4>网站初上，暂时没有任何文章。。。</h4>
+</div>
 
-                <div id="no-article-info">
-                    <h4>网站初上，暂时没有任何文章。。。</h4>
-                </div>
+{% endif %}
 
-                {% endif %}
+{% endblock main %}
 
-            </div>
 
-            <div id="extra-info" class="col-sm-3">
-                {% if hotTagRecords %}
+{% block extra %}
 
-                <h5>热门主题：</h5>
+{% if hotTagRecords %}
 
-                <ul class="list-group">
-                    {% for tag, count in hotTagRecords %}
-                    <li class="list-group-item">
-                        <span class="badge">{{ count }}</span>{{ tag.name }}
-                    </li>
-                    {% endfor %}
-                </ul>
+<h5>热门主题：</h5>
 
-                {% else %}
+<ul class="list-group">
+    {% for tag, count in hotTagRecords %}
+    <li class="list-group-item">
+        <span class="badge">{{ count }}</span>{{ tag.name }}
+    </li>
+    {% endfor %}
+</ul>
 
-                <h5>暂时没有任何主题</h5>
+{% else %}
 
-                {% endif %}
+<h5>暂时没有任何主题</h5>
 
-            </div>
+{% endif %}
 
-        </div>
-    </div>
-{% endblock content %}
+{% endblock extra %}

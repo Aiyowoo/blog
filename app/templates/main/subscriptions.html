@@ -1,10 +1,13 @@
-{% extends "base.html" %}
+{% extends "layoutMainLeft.html" %}
 {% from "macros/utility.html" import renderPagination, renderFlashedMessages, renderArticle, renderUserInfo %}
+
 
 {% block css %}
 {{ super() }}
-<link href="{{ url_for('static', filename='css/main/base.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/renderArticle.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/main/subscriptions.css') }}" rel="stylesheet"/>
 {% endblock css %}
+
 
 {% block title %}Blog-关注{% endblock title %}
 
@@ -12,53 +15,46 @@
 {% block subscriptionsActived %}class="active"{% endblock subscriptionsActived %}
 
 
-{% block content %}
-    <div class="container">
-        <div class="row">
+{% block main %}
 
-            <div class="col-sm-9">
+{{ renderFlashedMessages('warning') }}
 
-                {{ renderFlashedMessages('warning') }}
+{% if not followedCount %}
+<div id="box-3d">
+    <h4>您还未关注任何人，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>
+</div>
+{% elif not pagination or not pagination.items %}
 
-                {% if not followedCount %}
-                <div id="not-follow-info">
-                    <h4>您还未关注任何人，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>
-                </div>
-                {% elif not pagination or not pagination.items %}
+<div id ="box-3d">
+    <h4>您已关注{{ followedCount }}人，但并没有文章...<small><a href="{{ url_for('main.index') }}">去逛逛？</a></small></h4>
+</div>
 
-                <div id ="no-article-info">
-                    <h4>您已关注{{ followedCount }}人，但并没有文章...<small><a href="{{ url_for('main.index') }}">去逛逛？</a></small></h4>
-                </div>
+{% else %}
 
-                {% else %}
+<div id="summary-block">
+    <span class="label label-info font-size-lg padding-sm">已关注 <span class="badge">{{ current_user.followedRecords.count() }}</span></span>
+    <span class="label label-info font-size-lg padding-sm">文章 <span class="badge">{{ current_user.getFollowedArticleCount() }}</span></span>
+</div>
 
-                <div id="summary-block">
-                    <span class="label label-info font-size-lg padding-sm">已关注 <span class="badge">{{ current_user.followedRecords.count() }}</span></span>
-                    <span class="label label-info font-size-lg padding-sm">文章 <span class="badge">{{ current_user.getFollowedArticleCount() }}</span></span>
-                </div>
+{% for article in pagination.items %}
+{{ renderArticle(article) }}
+{% endfor %}
 
-                {% for article in pagination.items %}
-                {{ renderArticle(article) }}
-                {% endfor %}
+<div id="pagination">
+    <center>
+        {{ renderPagination(pagination, 'main.subscriptions') }}
+    </center>
+</div>
 
-                <div id="pagination">
-                    <center>
-                        {{ renderPagination(pagination, 'main.subscriptions') }}
-                    </center>
-                </div>
+{% endif %}
 
-                {% endif %}
+{% endblock main %}
 
-            </div>
 
-            <div id="extra-info" class="col-sm-3">
-                {% if current_user.is_authenticated %}
-                {{ renderUserInfo(current_user) }}
-                {% else %}
-                <h4 class="text-center">您还未登录</h4>
-                {% endif %}
-            </div>
-
-        </div>
-    </div>
-{% endblock content %}
+{% block extra %}
+{% if current_user.is_authenticated %}
+{{ renderUserInfo(current_user) }}
+{% else %}
+<h4 class="text-center">您还未登录</h4>
+{% endif %}
+{% endblock extra %}

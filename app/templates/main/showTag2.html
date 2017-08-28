@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "macros/utility.html" import renderPagination, renderFlashedMessages, renderArticle, renderUserInfo, renderFamousUserRecords %}
+
+{% block css %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/main/base.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/main/showTag.css') }}" rel="stylesheet"/>
+{% endblock css %}
+
+{% block title %}Blog-主题{% endblock title %}
+
+
+{% block themeActived %}class="active"{% endblock themeActived %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+
+            <div class="col-sm-9">
+
+                {{ renderFlashedMessages('warning') }}
+
+                <div class="tag-info">
+                    <h4>{{ tag.name }}</h4>
+
+                    <div>
+                        <ul>
+                            {% if not request.args.get('hot') %}
+                            <li>动态</li>
+                            <li><a href="{{ url_for('main.showTag', tagId=tag.id, hot=1) }}">热门</a></li>
+                            {% else %}
+                            <li><a href="{{ url_for('main.showTag', tagId=tag.id) }}">动态</a></li>
+                            <li>热门</li>
+                            {% endif %}
+                        </ul>
+
+                        <a class="btn btn-primary btn-sm pull-right" href="#" style="display:inline-block">关注主题</a>
+                    </div>
+                </div>
+
+                {% if not pagination or not pagination.items %}
+                <div class="no-article-info">
+                    <h4>并没有相关文章。。。</h4>
+                </div>
+                {% else %}
+
+                {% for article in pagination.items %}
+                {{ renderArticle(article) }}
+                {% endfor %}
+
+                <div id="pagination">
+                    <center>
+                        {{ renderPagination(pagination, 'main.showTag', tagId=tag.id) }}
+                    </center>
+                </div>
+
+                {% endif %}
+
+            </div>
+
+            <div id="extra-info" class="col-sm-3">
+                {{ renderFamousUserRecords(famousUserRecords) }}
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}

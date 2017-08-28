@@ -52,6 +52,8 @@
 .box-3d {
     border: 1px solid #ccc;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
+    padding: 15px;
 }
 
 .left-padding-sm {
@@ -76,4 +78,15 @@
 
 .no-padding {
     padding: 0px;
+}
+
+#main {
+    padding-left: 0px;
+}
+
+#extra {
+    padding: 15px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
 }
