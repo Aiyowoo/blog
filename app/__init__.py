@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
+from flask_bootstrap import Bootstrap
 from config import config
 from .models import db, AnonymousUser, User
 from .email import mail
@@ -21,6 +22,7 @@ def loadUser(userId):
 
 # 在所有视图中启用CSRF protect
 csrfProtect = CSRFProtect()
+bootstrap = Bootstrap()
 
 
 def createApp():
@@ -31,6 +33,7 @@ def createApp():
     loginManager.init_app(app)
     db.init_app(app)
     mail.init_app(app)
+    bootstrap.init_app(app)
 
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(main, url_prefix='')

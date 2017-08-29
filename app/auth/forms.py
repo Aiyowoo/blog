@@ -14,6 +14,7 @@ class RegisterForm(Form):
                             validators=[DataRequired(),
                                         EqualTo('password',
                                                 message='两次输入的密码必须相同')])
+    submit = SubmitField('提交')
 
     def validate_email(form, field):
         if field.data and User.query.filter_by(email=field.data).count():

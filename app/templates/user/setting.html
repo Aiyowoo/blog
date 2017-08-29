@@ -2,6 +2,8 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% from "macros/utility.html" import renderFlashedMessages %}
 
+{% block title %}设置{% endblock title %}
+
 {% block content %}
 <div class="container">
 
@@ -9,15 +11,19 @@
 
     <div class="box-3d">
         <div>
-            <ul class="ul nav-tabs">
-                <li {% if baseForm %}class="active"{% endif %}>基本设置</li>
-                <li {% if passwordForm %}class="active"{% endif %}>密码设置</li>
+            <ul class="nav nav-tabs">
+                <li role="presentation" {% if baseInfoForm %}class="active"{% endif %}>
+                    <a href="{{ url_for('user.setBaseInfo') }}">基本设置</a>
+                </li>
+                <li role="presentation" {% if passwordForm %}class="active"{% endif %}>
+                    <a href="{{ url_for('user.setPassword') }}">密码设置</a>
+                </li>
             </ul>
         </div>
 
         <div>
-            {% if baseForm %}
-            {{ wtf.quick_form(baseForm) }}
+            {% if baseInfoForm %}
+            {{ wtf.quick_form(baseInfoForm) }}
             {% else %}
             {{ wtf.quick_form(passwordForm) }}
             {% endif %}
