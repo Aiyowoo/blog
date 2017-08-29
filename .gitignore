@@ -7,3 +7,4 @@ app/auth/__pycache__
 .logs/*
 app/static/img/userPictures/*
 app/main/__pycache__/*
+app/user/__pycache__/*

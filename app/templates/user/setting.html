@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% from "macros/utility.html" import renderFlashedMessages %}
+
+{% block content %}
+<div class="container">
+
+    {{ renderFlashedMessages('warning') }}
+
+    <div class="box-3d">
+        <div>
+            <ul class="ul nav-tabs">
+                <li {% if baseForm %}class="active"{% endif %}>基本设置</li>
+                <li {% if passwordForm %}class="active"{% endif %}>密码设置</li>
+            </ul>
+        </div>
+
+        <div>
+            {% if baseForm %}
+            {{ wtf.quick_form(baseForm) }}
+            {% else %}
+            {{ wtf.quick_form(passwordForm) }}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

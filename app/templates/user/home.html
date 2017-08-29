@@ -1,14 +1,75 @@
 {% extends "layoutExtraLeft.html" %}
+{% from "macros/utility.html" import renderArticleSimple, renderPagination %}
 
 
 {% block css %}
 {{ super() }}
+<link href="{{ url_for('static', filename='css/renderArticleSimple.css') }}" rel="stylesheet"/>
+<link href="{{ url_for('static', filename='css/user/home.css') }}" rel="stylesheet"/>
 {% endblock css %}
 
 
+{% block title %}{{ user.name }}的主页{% endblock title %}
+
+
 {% block extra %}
+<div class="user-info">
+    <img id="user-picture" class="img img-responsive img-rounded center-block" src="{% if user.profilePicture %}{{ url_for('static', filename=join(current_app.config['USER_PROFILE_PICTURE_SAVE_DIR'], user.profilePicture)) }}{% else %}{{ url_for('static', filename=join(current_app.config['USER_PROFILE_PICTURE_SAVE_DIR'], 'default.jpg')) }}{% endif %}"/>
+    <h5 class="user-name">{{ user.name }}</h5>
+    <a class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-plus">加关注</a>
+</div>
+
+<div class="user-article-tags">
+    <ul class="list-group list-group-sm">
+        <a class="list-group-item {% if not tagId %}active{% endif %}">
+            <span class="badge">{{ totalArticleCount }}</span>所有文章
+        </a>
+        {% if not tagId %}
+
+        {% for tag, count in tagRecords %}
+        <a class="list-group-item">
+            <span class="badge">{{ count }}</span>{{ tag.name }}
+        </a>
+        {% endfor %}
+
+        {% else %}
+
+        {% for tag, count in tagRecords %}
+        <a class="list-group-item {% if tagId == tag.id %}active{% endif %}">
+            <span class="badge">{{ count }}</span>{{ tag.name }}
+        </a>
+        {% endfor %}
+
+        {% endif %}
+    </ul>
+</div>
 {% endblock extra %}
 
 
 {% block main %}
+
+{% if not pagination or not pagination.items %}
+
+<div class="box-3d">
+    <h5>没有任何文章哦。。。</h5>
+</div>
+
+{% else %}
+
+{% for article in pagination.items %}
+{{ renderArticleSimple(article) }}
+{% endfor %}
+
+<div>
+    <center>
+        {% if tagId %}
+        {{ renderPagination(pagination, 'user.home', tagId=tagId, userId=user.id) }}
+        {% else %}
+        {{ renderPagination(pagination, 'user.home', userId=user.id) }}
+        {% endif %}
+    </center>
+</div>
+
+{% endif %}
+
 {% endblock main %}

@@ -1,0 +1,19 @@
+.user-info {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 0px 15px;
+}
+
+.user-name {
+    display: inline-block;
+}
+
+
+.user-article-tags {
+    margin-top: 20px;
+}
+
+.user-picture {
+    width: 100px;
+    height: 100px;
+}

@@ -1,5 +1,5 @@
 {% extends "layoutMainLeft.html" %}
-{% from "macros/utility.html" import renderPagination, renderFlashedMessages, renderArticle, renderUserInfo %}
+{% from "macros/utility.html" import renderPagination, renderArticle, renderUserInfo %}
 
 
 {% block css %}
@@ -16,8 +16,6 @@
 
 
 {% block main %}
-
-{{ renderFlashedMessages('warning') }}
 
 {% if not followedCount %}
 <div id="box-3d">

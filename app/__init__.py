@@ -6,6 +6,7 @@ from .models import db, AnonymousUser, User
 from .email import mail
 from .auth import auth
 from .main import main
+from .user import user
 
 loginManager = LoginManager()
 loginManager.session_protection = "strong"
@@ -33,5 +34,6 @@ def createApp():
 
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(main, url_prefix='')
+    app.register_blueprint(user, url_prefix='/user')
 
     return app

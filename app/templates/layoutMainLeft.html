@@ -1,16 +1,21 @@
 {% extends "base.html" %}
+{% from "macros/utility.html" import renderFlashedMessages %}
 
 
 {% block content %}
 
 <div class="container">
 
-    <div id="main" class="col-sm-9">
+    {% block top %}
+    {{ renderFlashedMessages('warning') }}
+    {% endblock %}
+
+    <div id="left-main" class="col-sm-9">
         {% block main %}
         {% endblock main %}
     </div>
 
-    <div id="extra" class="col-sm-3">
+    <div id="right-extra" class="col-sm-3">
         {% block extra %}
         {% endblock extra %}
     </div>

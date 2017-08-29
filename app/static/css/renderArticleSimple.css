@@ -1,0 +1,31 @@
+.article {
+    padding: 15px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, .29), inset 1px 1px 1px rgba(255, 255, 255, .44);
+    background-color: #fff;
+    margin-bottom: 15px;
+}
+
+h4.article-title {
+    display: inline-block;
+    margin-top: 0px;
+}
+
+.article-creationDate {
+    float: right;
+    text-align: right;
+}
+
+.article-info {
+    height: 130px;
+    overflow: hidden;
+}
+
+.article-content {
+    padding: 0px;
+}
+
+.article-info img {
+    height: 100%;
+}
+

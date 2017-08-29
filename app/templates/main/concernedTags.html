@@ -17,8 +17,6 @@
 
 {% block main %}
 
-{{ renderFlashedMessages('warning') }}
-
 {% if not concernedTags %}
 <div class="box-3d">
     <h4>您还未关注任何主题，<a href="{{ url_for('main.index') }}"><small>去逛逛？</small></a></h4>

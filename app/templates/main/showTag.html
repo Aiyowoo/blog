@@ -1,5 +1,5 @@
 {% extends "layoutMainLeft.html" %}
-{% from "macros/utility.html" import renderPagination, renderFlashedMessages, renderArticle, renderUserInfo, renderFamousUserRecords %}
+{% from "macros/utility.html" import renderPagination, renderArticle, renderUserInfo, renderFamousUserRecords %}
 
 
 {% block css %}
@@ -16,8 +16,6 @@
 
 
 {% block main %}
-
-{{ renderFlashedMessages('warning') }}
 
 <div class="tag-info">
     <h4>{{ tag.name }}</h4>

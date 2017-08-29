@@ -35,6 +35,9 @@ class BaseConfig:
     HOT_TAG_COUNT = 9
     FAMOUS_USER_COUNT = 9
 
+    USER_PROFILE_PICTURE_SAVE_DIR = 'img/userPictures/'
+    ARTICLE_PICTURE_SAVE_DIR = 'img/articlePictures/'
+
     @staticmethod
     def initApp(app):
         app.config.from_object(BaseConfig)

@@ -58,6 +58,47 @@
 {% endmacro %}
 
 
+{# 调用时需导入 renderArticleSimple.css #}
+{% macro renderArticleSimple(article) %}
+<div class="article">
+    <div class="article-info">
+        {% if article.firstContentPicture %}
+        <div class="col-sm-9 article-content">
+            {% else %}
+            <div class="col-sm-10 article-content">
+                {% endif %}
+                <div>
+                    <h4 class="article-title">{{ article.title }}</h4>
+                    <strong class="article-creationDate">{{ article.creationDate }}</strong>
+                </div>
+
+                <div>
+                    <p>{{ article.summary }}</p>
+                </div>
+        </div>
+
+        {% if article.firstContentPicture %}
+        <div class="col-sm-3">
+            <img src="{{ article.firstContentPicture }}" class="img-responsive"/>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="article-tags">
+        {% with tagRecords = article.tagRecords.all() %}
+        {% if tagRecords %}
+        {% for tagRecord in tagRecords %}
+        <a href="{{ url_for('main.showTag', tagId=tagRecord.tagId) }}"><span class="label label-info">{{ tagRecord.tag.name }}</span></a>
+        {% endfor %}
+        {% else %}
+        <a><span class="label label-info">其他</span></a>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+{% endmacro %}
+
+
 {% macro renderPagination(pagination, endpoint) %}
 
 <nav aria-label="Page navigation">
